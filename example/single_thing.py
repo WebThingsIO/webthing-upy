@@ -3,12 +3,13 @@ from event import Event
 from property import Property
 from thing import Thing
 from value import Value
-from server import WebThingServer
+from server import SingleThing, WebThingServer
 import logging
 import time
 import uuid
 
 log = logging.getLogger(__name__)
+
 
 class OverheatedEvent(Event):
 
@@ -89,10 +90,9 @@ def run_server():
 
     thing = make_thing()
 
-    # If adding more than one thing here, be sure to set the `name`
-    # parameter to some string, which will be broadcast via mDNS.
+    # If adding more than one thing, use MultipleThings() with a name.
     # In the single thing case, the thing's name will be broadcast.
-    server = WebThingServer([thing], port=80)
+    server = WebThingServer(SingleThing(thing), port=80)
     try:
         log.info('starting the server')
         server.start()
