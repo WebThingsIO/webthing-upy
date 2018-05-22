@@ -3,13 +3,14 @@ from event import Event
 from property import Property
 from thing import Thing
 from value import Value
-from server import WebThingServer
+from server import MultipleThings, WebThingServer
 import logging
 import random
 import time
 import uuid
 
 log = logging.getLogger(__name__)
+
 
 class OverheatedEvent(Event):
 
@@ -155,11 +156,10 @@ def run_server():
     # Create a thing that represents a humidity sensor
     sensor = FakeGpioHumiditySensor()
 
-    # If adding more than one thing here, be sure to set the `name`
-    # parameter to some string, which will be broadcast via mDNS.
+    # If adding more than one thing, use MultipleThings() with a name.
     # In the single thing case, the thing's name will be broadcast.
-    server = WebThingServer([light, sensor],
-                            name='LightAndTempDevice',
+    server = WebThingServer(MultipleThings([light, sensor],
+                                           'LightAndTempDevice'),
                             port=80)
     try:
         log.info('starting the server')

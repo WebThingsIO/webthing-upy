@@ -1,15 +1,12 @@
-from action import Action
-from event import Event
 from property import Property
 from thing import Thing
 from value import Value
-from server import WebThingServer
+from server import SingleThing, WebThingServer
 import logging
-import time
-import uuid
 import machine
 
 log = logging.getLogger(__name__)
+
 
 class RGBLed(Thing):
 
@@ -59,6 +56,7 @@ class RGBLed(Thing):
   def setRGBColor(self, color):
       print('setRGBColor: color =', color)
 
+
 def run_server():
     log.info('run_server')
 
@@ -67,7 +65,7 @@ def run_server():
     # If adding more than one thing here, be sure to set the `name`
     # parameter to some string, which will be broadcast via mDNS.
     # In the single thing case, the thing's name will be broadcast.
-    server = WebThingServer([rgb], port=80)
+    server = WebThingServer(SingleThing(rgb), port=80)
     try:
         log.info('starting the server')
         server.start()
