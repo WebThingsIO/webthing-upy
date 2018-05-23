@@ -8,83 +8,86 @@ import machine
 
 log = logging.getLogger(__name__)
 
+
 class Led(Thing):
 
-  def __init__(self, ledPin):
-    Thing.__init__(self,
-                   'Blue LED',
-                   'dimmableLight',
-                   'Blue LED on SparkFun ESP32 Thing')
-    self.pinLed = machine.Pin(ledPin, machine.Pin.OUT)
-    self.pwmLed = machine.PWM(self.pinLed)
-    self.ledLevel = 50
-    self.on = False
-    self.updateLed()
+    def __init__(self, ledPin):
+        Thing.__init__(self,
+                       'Blue LED',
+                       'dimmableLight',
+                       'Blue LED on SparkFun ESP32 Thing')
+        self.pinLed = machine.Pin(ledPin, machine.Pin.OUT)
+        self.pwmLed = machine.PWM(self.pinLed)
+        self.ledLevel = 50
+        self.on = False
+        self.updateLed()
 
-    self.add_property(
-      Property(self,
-               'on',
-               Value(self.on, self.setOnOff),
-               metadata={
-                'type': 'boolean',
-                'description': 'Whether the LED is turned on',
-               }))
-    self.add_property(
-      Property(self,
-               'level',
-               Value(self.ledLevel, self.setLevel),
-               metadata={
-                'type': 'number',
-                'description': 'The brightness of the LED',
-               }))
+        self.add_property(
+            Property(self,
+                     'on',
+                     Value(self.on, self.setOnOff),
+                     metadata={
+                         'type': 'boolean',
+                         'description': 'Whether the LED is turned on',
+                     }))
+        self.add_property(
+            Property(self,
+                     'level',
+                     Value(self.ledLevel, self.setLevel),
+                     metadata={
+                         'type': 'number',
+                         'description': 'The brightness of the LED',
+                     }))
 
-  def setOnOff(self, onOff):
-    log.info('setOnOff: onOff = ' + str(onOff))
-    self.on = onOff
-    self.updateLed()
+    def setOnOff(self, onOff):
+        log.info('setOnOff: onOff = ' + str(onOff))
+        self.on = onOff
+        self.updateLed()
 
-  def setLevel(self, level):
-    log.info('setLevel: level = ' + str(level))
-    self.ledLevel = level
-    self.updateLed()
+    def setLevel(self, level):
+        log.info('setLevel: level = ' + str(level))
+        self.ledLevel = level
+        self.updateLed()
 
-  def updateLed(self):
-    log.debug('updateLed: on = ' + str(self.on) +
-              ' level = ' + str(self.ledLevel))
-    if self.on:
-      self.pwmLed.duty(self.ledLevel)
-    else:
-      self.pwmLed.duty(0)
+    def updateLed(self):
+        log.debug('updateLed: on = ' + str(self.on) +
+                  ' level = ' + str(self.ledLevel))
+        if self.on:
+            self.pwmLed.duty(self.ledLevel)
+        else:
+            self.pwmLed.duty(0)
+
 
 class Button(Thing):
 
-  def __init__(self, pin):
-    Thing.__init__(self,
-                   'Button 0',
-                   'binarySensor',
-                   'Button 0 on SparkFun ESP32 Thing')
-    self.pin = machine.Pin(pin, machine.Pin.IN)
+    def __init__(self, pin):
+        Thing.__init__(self,
+                       'Button 0',
+                       'binarySensor',
+                       'Button 0 on SparkFun ESP32 Thing')
+        self.pin = machine.Pin(pin, machine.Pin.IN)
 
-    self.button = Value(False)
-    self.add_property(
-      Property(self,
-               'on',
-               self.button,
-               metadata={
-                 'type': 'boolean',
-                 'description': 'Button 0 pressed'
-               }))
-    self.prev_pressed = self.is_pressed()
+        self.button = Value(False)
+        self.add_property(
+            Property(self,
+                     'on',
+                     self.button,
+                     metadata={
+                         'type': 'boolean',
+                         'description': 'Button 0 pressed'
+                     }))
+        self.prev_pressed = self.is_pressed()
 
-  def is_pressed(self):
-    return self.pin.value() == 0
+    def is_pressed(self):
+        return self.pin.value() == 0
 
-  def process(self):
-    pressed = self.is_pressed()
-    if pressed != self.prev_pressed:
-      self.prev_pressed = pressed
-      log.debug('pressed = ' + str(pressed))
-      self.button.notify_of_external_update(pressed)
+    def process(self):
+        pressed = self.is_pressed()
+        if pressed != self.prev_pressed:
+            self.prev_pressed = pressed
+            log.debug('pressed = ' + str(pressed))
+            self.button.notify_of_external_update(pressed)
+
 
 def run_server():
     log.info('run_server')

@@ -26,77 +26,77 @@ ws_run_in_thread = False
 
 
 def print_exc(func):
-  def wrapper(*args, **kwargs):
-    try:
-      #log.debug('Calling {}'.format(func.__name__))
-      ret = func(*args, **kwargs)
-      #log.debug('Back from {}'.format(func.__name__))
-      return ret
-    except Exception as err:
-      sys.print_exception(err)
-  return wrapper
+    def wrapper(*args, **kwargs):
+        try:
+            # log.debug('Calling {}'.format(func.__name__))
+            ret = func(*args, **kwargs)
+            # log.debug('Back from {}'.format(func.__name__))
+            return ret
+        except Exception as err:
+            sys.print_exception(err)
+    return wrapper
 
 
 class SingleThing:
-  """A container for a single thing."""
+    """A container for a single thing."""
 
-  def __init__(self, thing):
-    """
-    Initialize the container.
+    def __init__(self, thing):
+        """
+        Initialize the container.
 
-    thing -- the thing to store
-    """
-    self.thing = thing
+        thing -- the thing to store
+        """
+        self.thing = thing
 
-  def get_thing(self, _):
-    """Get the thing at the given index."""
-    return self.thing
+    def get_thing(self, _):
+        """Get the thing at the given index."""
+        return self.thing
 
-  def get_things(self):
-    """Get the list of things."""
-    return [self.thing]
+    def get_things(self):
+        """Get the list of things."""
+        return [self.thing]
 
-  def get_name(self):
-    """Get the mDNS server name."""
-    return self.thing.name
+    def get_name(self):
+        """Get the mDNS server name."""
+        return self.thing.name
 
 
 class MultipleThings:
-  """A container for multiple things."""
+    """A container for multiple things."""
 
-  def __init__(self, things, name):
-    """
-    Initialize the container.
+    def __init__(self, things, name):
+        """
+        Initialize the container.
 
-    things -- the things to store
-    name -- the mDNS server name
-    """
-    self.things = things
-    self.name = name
+        things -- the things to store
+        name -- the mDNS server name
+        """
+        self.things = things
+        self.name = name
 
-  def get_thing(self, idx):
-    """
-    Get the thing at the given index.
+    def get_thing(self, idx):
+        """
+        Get the thing at the given index.
 
-    idx -- the index
-    """
-    try:
-      idx = int(idx)
-    except ValueError:
-      return None
+        idx -- the index
+        """
+        try:
+            idx = int(idx)
+        except ValueError:
+            return None
 
-    if idx < 0 or idx >= len(self.things):
-      return None
+        if idx < 0 or idx >= len(self.things):
+            return None
 
-    return self.things[idx]
+        return self.things[idx]
 
-  def get_things(self):
-    """Get the list of things."""
-    return self.things
+    def get_things(self):
+        """Get the list of things."""
+        return self.things
 
-  def get_name(self):
-    """Get the mDNS server name."""
-    return self.name
+    def get_name(self):
+        """Get the mDNS server name."""
+        return self.name
 
 
 class WebThingServer:
@@ -275,7 +275,6 @@ class WebThingServer:
             thing_id = 0
         else:
             thing_id = int(reqPath.split('/')[1])
-        print('thing_id =', thing_id)
         thing = things[thing_id]
         webSocket.thing = thing
         thing.add_subscriber(webSocket)

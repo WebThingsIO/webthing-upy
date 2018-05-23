@@ -1,7 +1,5 @@
 """High-level Thing base class implementation."""
 
-#from jsonschema import validate
-#from jsonschema.exceptions import ValidationError
 import json
 
 
@@ -297,11 +295,11 @@ class Thing:
 
         action_type = self.available_actions[action_name]
 
-        #if 'input' in action_type['metadata']:
-        #    try:
-        #        validate(input_, action_type['metadata']['input'])
-        #    except ValidationError:
-        #        return None
+        # if 'input' in action_type['metadata']:
+        #     try:
+        #         validate(input_, action_type['metadata']['input'])
+        #     except ValidationError:
+        #         return None
 
         action = action_type['class'](self, input_=input_)
         action.set_href_prefix(self.href_prefix)
@@ -372,7 +370,7 @@ class Thing:
         name -- name of the event
         ws -- the websocket
         """
-        print('add_event_subscriber:',name)
+        print('add_event_subscriber:', name)
         if name in self.available_events:
             self.available_events[name]['subscribers'].add(ws)
 
@@ -383,10 +381,10 @@ class Thing:
         name -- name of the event
         ws -- the websocket
         """
-        print('remove_event_subscriber:',name)
+        print('remove_event_subscriber:', name)
         if name in self.available_events and \
-           ws in self.available_events[name]['subscribers']:
-          self.available_events[name]['subscribers'].remove(ws)
+                ws in self.available_events[name]['subscribers']:
+            self.available_events[name]['subscribers'].remove(ws)
 
     def property_notify(self, property_):
         """
@@ -402,7 +400,7 @@ class Thing:
         })
 
         for subscriber in self.subscribers:
-          subscriber.SendText(message)
+            subscriber.SendText(message)
 
     def action_notify(self, action):
         """
@@ -411,12 +409,12 @@ class Thing:
         action -- the action whose status changed
         """
         message = json.dumps({
-          'messageType': 'actionStatus',
-          'data': action.as_action_description(),
+            'messageType': 'actionStatus',
+            'data': action.as_action_description(),
         })
 
         for subscriber in self.subscribers:
-          subscriber.SendText(message)
+            subscriber.SendText(message)
 
     def event_notify(self, event):
         """
@@ -433,4 +431,4 @@ class Thing:
         })
 
         for subscriber in self.available_events[event.name]['subscribers']:
-          subscriber.SendText(message)
+            subscriber.SendText(message)
