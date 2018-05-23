@@ -8,17 +8,10 @@ sys.path.append('/flash/upy')
 sys.path.append('/flash/webthing')
 sys.path.append('/flash/example')
 
-# remove ourselves so that we can be re-imported
-mod_name = __name__
-g = globals()
-if mod_name in g:
-    print('Deleting', mod_name, 'from globals')
-    del g[mod_name]
-if mod_name in sys.modules:
-    print('Deleting', mod_name, 'from sys.modules')
-    del sys.modules[mod_name]
-
 import connect
+
+connect.connect_to_ap()
+connect.start_ntp()
 
 def rgb():
   print('importing esp32_wrover_kit_rgb...')
@@ -37,3 +30,9 @@ def multi():
   import multiple_things
   print('Starting multiple_things server...')
   multiple_things.run_server()
+
+def thing():
+  print('importing sparkfun_esp32_thing...')
+  import sparkfun_esp32_thing
+  print('Starting sparkfun_esp32_thing server...')
+  sparkfun_esp32_thing.run_server()
