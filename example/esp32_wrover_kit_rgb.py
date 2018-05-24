@@ -10,57 +10,69 @@ log = logging.getLogger(__name__)
 
 class RGBLed(Thing):
 
-  def __init__(self, rPin, gPin, bPin):
-    Thing.__init__(self,
-                   'ESP32-RGB-LED',
-                   'dimmableColorLight',
-                   'RGB LED on ESP-Wrover-Kit')
-    self.red = machine.Pin(rPin, machine.Pin.OUT)
-    self.green = machine.Pin(gPin, machine.Pin.OUT)
-    self.blue = machine.Pin(bPin, machine.Pin.OUT)
+    def __init__(self, rPin, gPin, bPin):
+        Thing.__init__(self,
+                       'ESP32-RGB-LED',
+                       'onOffColorLight',
+                       'RGB LED on ESP-Wrover-Kit')
+        self.pinRed = machine.Pin(rPin, machine.Pin.OUT)
+        self.pinGreen = machine.Pin(gPin, machine.Pin.OUT)
+        self.pinBlue = machine.Pin(bPin, machine.Pin.OUT)
+        self.pwmRed = machine.PWM(self.pinRed)
+        self.pwmGreen = machine.PWM(self.pinGreen)
+        self.pwmBlue = machine.PWM(self.pinBlue)
+        self.redLevel = 50
+        self.greenLevel = 50
+        self.blueLevel = 50
+        self.on = False
+        self.updateLeds()
 
-    self.add_property(
-      Property(self,
-               'on',
-               Value(True, self.setOnOff),
-               metadata={
-                'type': 'boolean',
-                'description': 'Whether the LED is turned on',
-               }))
-    self.add_property(
-        Property(self,
-                 'level',
-                 Value(50, self.setRGBLevel),
-                 metadata={
-                     'type': 'number',
-                     'description': 'The level of light from 0-100',
-                     'minimum': 0,
-                     'maximum': 100,
-                 }))
+        self.add_property(
+            Property(self,
+                     'on',
+                     Value(True, self.setOnOff),
+                     metadata={
+                         'type': 'boolean',
+                         'description': 'Whether the LED is turned on',
+                     }))
+        self.add_property(
+            Property(self,
+                     'color',
+                     Value('#808080', self.setRGBColor),
+                     metadata={
+                         'type': 'string',
+                         'description': 'The color of the LED',
+                     }))
 
-    self.add_property(
-        Property(self,
-                 'color',
-                 Value('#808080', self.setRGBColor),
-                 metadata={
-                     'type': 'string',
-                     'description': 'The color of the LED',
-                 }))
+    def setOnOff(self, onOff):
+        print('setOnOff: onOff =', onOff)
+        self.on = onOff
+        self.updateLeds()
 
-  def setOnOff(self, onOff):
-      print('setOnOff: onOff =', onOff)
+    def setRGBColor(self, color):
+        print('setRGBColor: color =', color)
+        self.redLevel = int(color[1:3], 16) / 256 * 100
+        self.greenLevel = int(color[3:5], 16) / 256 * 100
+        self.blueLevel = int(color[5:7], 16) / 256 * 100
+        self.updateLeds()
 
-  def setRGBLevel(self, level):
-      print('setsetRGBColorOnOff: level =', level)
-
-  def setRGBColor(self, color):
-      print('setRGBColor: color =', color)
+    def updateLeds(self):
+        print('updateLeds: on =', self.on, 'r', self.redLevel,
+              'g', self.greenLevel, 'b', self.blueLevel)
+        if self.on:
+            self.pwmRed.duty(self.redLevel)
+            self.pwmGreen.duty(self.greenLevel)
+            self.pwmBlue.duty(self.blueLevel)
+        else:
+            self.pwmRed.duty(0)
+            self.pwmGreen.duty(0)
+            self.pwmBlue.duty(0)
 
 
 def run_server():
     log.info('run_server')
 
-    rgb = RGBLed(0, 4, 2)
+    rgb = RGBLed(0, 2, 4)
 
     # If adding more than one thing here, be sure to set the `name`
     # parameter to some string, which will be broadcast via mDNS.

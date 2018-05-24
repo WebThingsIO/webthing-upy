@@ -20,8 +20,8 @@ def get_ip():
     """
     station = network.WLAN(network.STA_IF)
     if station.isconnected():
-      ip = station.ifconfig()[0]
+        ip = station.ifconfig()[0]
     else:
-      ip = '127.0.0.1'
+        ip = '127.0.0.1'
 
     return ip
