@@ -10,8 +10,8 @@ def timestamp():
 
     Returns the current time in the form YYYY-mm-ddTHH:MM:SS+00:00
     """
-
-    return time.strftime('%Y-%m-%dT%H:%M:%S+00:00')
+    now = time.localtime()
+    return '{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}+00:00'.format(*now[:6])
 
 
 def get_ip():
