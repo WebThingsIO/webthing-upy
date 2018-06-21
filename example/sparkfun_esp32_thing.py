@@ -14,11 +14,11 @@ class Led(Thing):
     def __init__(self, ledPin):
         Thing.__init__(self,
                        'Blue LED',
-                       'dimmableLight',
+                       ['OnOffSwitch', 'Light'],
                        'Blue LED on SparkFun ESP32 Thing')
         self.pinLed = machine.Pin(ledPin, machine.Pin.OUT)
         self.pwmLed = machine.PWM(self.pinLed)
-        self.ledLevel = 50
+        self.ledBrightness = 50
         self.on = False
         self.updateLed()
 
@@ -27,15 +27,22 @@ class Led(Thing):
                      'on',
                      Value(self.on, self.setOnOff),
                      metadata={
+                         '@type': 'OnOffProperty',
+                         'label': 'On/Off',
                          'type': 'boolean',
                          'description': 'Whether the LED is turned on',
                      }))
         self.add_property(
             Property(self,
-                     'level',
-                     Value(self.ledLevel, self.setLevel),
+                     'brightness',
+                     Value(self.ledBrightness, self.setBrightness),
                      metadata={
+                         '@type': 'BrightnessProperty',
+                         'label': 'Brightness',
                          'type': 'number',
+                         'minimum': 0,
+                         'maximum': 100,
+                         'unit': 'percent',
                          'description': 'The brightness of the LED',
                      }))
 
@@ -44,16 +51,16 @@ class Led(Thing):
         self.on = onOff
         self.updateLed()
 
-    def setLevel(self, level):
-        log.info('setLevel: level = ' + str(level))
-        self.ledLevel = level
+    def setBrightness(self, brightness):
+        log.info('setBrightness: brightness = ' + str(brightness))
+        self.ledBrightness = brightness
         self.updateLed()
 
     def updateLed(self):
         log.debug('updateLed: on = ' + str(self.on) +
-                  ' level = ' + str(self.ledLevel))
+                  ' brightness = ' + str(self.ledBrightness))
         if self.on:
-            self.pwmLed.duty(self.ledLevel)
+            self.pwmLed.duty(self.ledBrightness)
         else:
             self.pwmLed.duty(0)
 

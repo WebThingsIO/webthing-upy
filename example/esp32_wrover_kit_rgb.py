@@ -13,7 +13,7 @@ class RGBLed(Thing):
     def __init__(self, rPin, gPin, bPin):
         Thing.__init__(self,
                        'ESP32-RGB-LED',
-                       'onOffColorLight',
+                       ['OnOffSwitch', 'Light', 'ColorControl'],
                        'RGB LED on ESP-Wrover-Kit')
         self.pinRed = machine.Pin(rPin, machine.Pin.OUT)
         self.pinGreen = machine.Pin(gPin, machine.Pin.OUT)
@@ -32,6 +32,8 @@ class RGBLed(Thing):
                      'on',
                      Value(True, self.setOnOff),
                      metadata={
+                         '@type': 'OnOffProperty',
+                         'label': 'On/Off',
                          'type': 'boolean',
                          'description': 'Whether the LED is turned on',
                      }))
@@ -40,6 +42,8 @@ class RGBLed(Thing):
                      'color',
                      Value('#808080', self.setRGBColor),
                      metadata={
+                         '@type': 'ColorProperty',
+                         'label': 'Color',
                          'type': 'string',
                          'description': 'The color of the LED',
                      }))
