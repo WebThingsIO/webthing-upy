@@ -70,7 +70,7 @@ class Button(Thing):
     def __init__(self, pin):
         Thing.__init__(self,
                        'Button 0',
-                       'binarySensor',
+                       ['BinarySensor'],
                        'Button 0 on SparkFun ESP32 Thing')
         self.pin = machine.Pin(pin, machine.Pin.IN)
 
