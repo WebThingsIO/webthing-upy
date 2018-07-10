@@ -192,11 +192,10 @@ class WebThingServer:
           mac[3], mac[4], mac[5])
         mdns = network.mDNS()
         mdns.start(hostname, 'MicroPython with mDNS')
-        mdns.addService('_http', '_tcp', 80, hostname,
+        mdns.addService('_webthing', '_tcp', 80, hostname,
                         {
                           'board': 'ESP32',
-                          'webthing': 'true',
-                          'url': 'http://{}:{}/'.format(utils.get_ip(), 80)
+                          'path': '/',
                         })
 
     def stop(self):
