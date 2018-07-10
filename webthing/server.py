@@ -5,7 +5,6 @@ import _thread
 import logging
 import sys
 import network
-import utils
 
 from utils import get_ip
 
@@ -23,6 +22,13 @@ WS_messages = True
 srv_run_in_thread = True
 # Run microWebSocket in thread
 ws_run_in_thread = False
+
+_CORS_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers':
+        'Origin, X-Requested-With, Content-Type, Accept',
+    'Access-Control-Allow-Methods': 'GET, HEAD, PUT, POST, DELETE',
+}
 
 
 def print_exc(func):
@@ -216,10 +222,13 @@ class WebThingServer:
 
     @print_exc
     def thingsGetHandler(self, httpClient, httpResponse):
-        httpResponse.WriteResponseJSONOk([
-            thing.as_thing_description()
-            for idx, thing in enumerate(self.things.get_things())
-        ])
+        httpResponse.WriteResponseJSONOk(
+            obj=[
+                thing.as_thing_description()
+                for idx, thing in enumerate(self.things.get_things())
+            ],
+            headers=_CORS_HEADERS,
+        )
 
     @print_exc
     def thingGetHandler(self, httpClient, httpResponse, routeArgs=None):
@@ -228,7 +237,10 @@ class WebThingServer:
             httpResponse.WriteResponseNotFound()
             return
         descr = self.thing.as_thing_description()
-        httpResponse.WriteResponseJSONOk(descr)
+        httpResponse.WriteResponseJSONOk(
+            obj=descr,
+            headers=_CORS_HEADERS,
+        )
 
     @print_exc
     def propertyGetHandler(self, httpClient, httpResponse, routeArgs=None):
@@ -236,7 +248,10 @@ class WebThingServer:
         if thing is None or prop is None:
             httpResponse.WriteResponseNotFound()
             return
-        httpResponse.WriteResponseJSONOk({prop.get_name(): prop.get_value()})
+        httpResponse.WriteResponseJSONOk(
+            obj={prop.get_name(): prop.get_value()},
+            headers=_CORS_HEADERS,
+        )
 
     @print_exc
     def propertyPutHandler(self, httpClient, httpResponse, routeArgs=None):
@@ -253,7 +268,10 @@ class WebThingServer:
         except AttributeError:
             httpResponse.WriteResponseForbidden()
             return
-        httpResponse.WriteResponseJSONOk({prop.get_name(): prop.get_value()})
+        httpResponse.WriteResponseJSONOk(
+            obj={prop.get_name(): prop.get_value()},
+            headers=_CORS_HEADERS,
+        )
 
     # === MicroWebSocket callbacks ===
 
