@@ -32,6 +32,7 @@ _CORS_HEADERS = {
 
 
 def print_exc(func):
+    """Wrap a function and print an exception, if encountered."""
     def wrapper(*args, **kwargs):
         try:
             # log.debug('Calling {}'.format(func.__name__))
@@ -164,6 +165,11 @@ class WebThingServer:
                     self.thingGetHandler
                 ),
                 (
+                    '/<thing_id>/properties',
+                    'GET',
+                    self.propertiesGetHandler
+                ),
+                (
                     '/<thing_id>/properties/<property_name>',
                     'GET',
                     self.propertyGetHandler
@@ -181,6 +187,11 @@ class WebThingServer:
                     '/',
                     'GET',
                     self.thingGetHandler
+                ),
+                (
+                    '/properties',
+                    'GET',
+                    self.propertiesGetHandler
                 ),
                 (
                     '/properties/<property_name>',
@@ -232,10 +243,12 @@ class WebThingServer:
         self.server.Stop()
 
     def getThing(self, routeArgs):
+        """Get the thing ID based on the route."""
         thing_id = routeArgs['thing_id'] if 'thing_id' in routeArgs else None
         return self.things.get_thing(thing_id)
 
     def getProperty(self, routeArgs):
+        """Get the property name based on the route."""
         thing = self.getThing(routeArgs)
         if thing:
             property_name = routeArgs['property_name']
@@ -244,6 +257,7 @@ class WebThingServer:
         return None, None
 
     def validateHost(self, headers):
+        """Validate the Host header in the request."""
         host = headers.get('host', None)
         if host is not None and host in self.hosts:
             return True
@@ -252,6 +266,7 @@ class WebThingServer:
 
     @print_exc
     def thingsGetHandler(self, httpClient, httpResponse):
+        """Handle a request to / when the server manages multiple things."""
         if not self.validateHost(httpClient.GetRequestHeaders()):
             httpResponse.WriteResponseError(403)
             return
@@ -266,22 +281,33 @@ class WebThingServer:
 
     @print_exc
     def thingGetHandler(self, httpClient, httpResponse, routeArgs=None):
+        """Handle a GET request for an individual thing."""
         if not self.validateHost(httpClient.GetRequestHeaders()):
             httpResponse.WriteResponseError(403)
             return
 
-        self.thing = self.getThing(routeArgs)
-        if self.thing is None:
+        thing = self.getThing(routeArgs)
+        if thing is None:
             httpResponse.WriteResponseNotFound()
             return
-        descr = self.thing.as_thing_description()
+        descr = thing.as_thing_description()
         httpResponse.WriteResponseJSONOk(
             obj=descr,
             headers=_CORS_HEADERS,
         )
 
     @print_exc
+    def propertiesGetHandler(self, httpClient, httpResponse, routeArgs=None):
+        """Handle a GET request for a property."""
+        thing = self.getThing(routeArgs)
+        if thing is None:
+            httpResponse.WriteResponseNotFound()
+            return
+        httpResponse.WriteResponseJSONOk(thing.get_properties())
+
+    @print_exc
     def propertyGetHandler(self, httpClient, httpResponse, routeArgs=None):
+        """Handle a GET request for a property."""
         if not self.validateHost(httpClient.GetRequestHeaders()):
             httpResponse.WriteResponseError(403)
             return
@@ -297,6 +323,7 @@ class WebThingServer:
 
     @print_exc
     def propertyPutHandler(self, httpClient, httpResponse, routeArgs=None):
+        """Handle a PUT request for a property."""
         if not self.validateHost(httpClient.GetRequestHeaders()):
             httpResponse.WriteResponseError(403)
             return
