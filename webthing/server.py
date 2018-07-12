@@ -108,12 +108,13 @@ class MultipleThings:
 class WebThingServer:
     """Server to represent a Web Thing over HTTP."""
 
-    def __init__(self, things, port=80, ssl_options=None):
+    def __init__(self, things, port=80, hostname=None, ssl_options=None):
         """
         Initialize the WebThingServer.
 
         things -- list of Things managed by this server
         port -- port to listen on (defaults to 80)
+        hostname -- Optional host name, i.e. mything.com
         ssl_options -- dict of SSL options to pass to the tornado server
         """
         self.ssl_suffix = '' if ssl_options is None else 's'
@@ -121,7 +122,30 @@ class WebThingServer:
         self.things = things
         self.name = things.get_name()
         self.port = port
+        self.hostname = hostname
         self.ip = get_ip()
+
+        station = network.WLAN()
+        mac = station.config('mac')
+        self.system_hostname = 'esp32-upy-{:02x}{:02x}{:02x}'.format(
+          mac[3], mac[4], mac[5])
+
+        self.hosts = [
+            '127.0.0.1',
+            '127.0.0.1:{}'.format(self.port),
+            'localhost',
+            'localhost:{}'.format(self.port),
+            self.ip,
+            '{}:{}'.format(self.ip, self.port),
+            '{}.local'.format(self.system_hostname),
+            '{}.local:{}'.format(self.system_hostname, self.port),
+        ]
+
+        if self.hostname is not None:
+            self.hosts.extend([
+                self.hostname,
+                '{}:{}'.format(self.hostname, self.port),
+            ])
 
         if isinstance(self.things, MultipleThings):
             log.info('Registering multiple things')
@@ -171,7 +195,10 @@ class WebThingServer:
             ]
 
         for idx, thing in enumerate(self.things.get_things()):
-            href = '//{}:{}{}'.format(self.ip, self.port, thing.href_prefix)
+            href = '//{}:{}{}'.format(
+                self.hostname if self.hostname is not None else self.ip,
+                self.port,
+                thing.href_prefix)
             thing.set_ws_href('ws{}:{}'.format(self.ssl_suffix, href))
 
         self.server = MicroWebSrv(webPath='/flash/www',
@@ -192,13 +219,9 @@ class WebThingServer:
         log.info('Starting Web Server on ' + url)
         self.server.Start(threaded=srv_run_in_thread, stackSize=12*1024)
 
-        station = network.WLAN()
-        mac = station.config('mac')
-        hostname = 'esp32-upy-{:02x}{:02x}{:02x}'.format(
-          mac[3], mac[4], mac[5])
         mdns = network.mDNS()
-        mdns.start(hostname, 'MicroPython with mDNS')
-        mdns.addService('_webthing', '_tcp', 80, hostname,
+        mdns.start(self.system_hostname, 'MicroPython with mDNS')
+        mdns.addService('_webthing', '_tcp', 80, self.system_hostname,
                         {
                           'board': 'ESP32',
                           'path': '/',
@@ -220,8 +243,19 @@ class WebThingServer:
                 return thing, thing.find_property(property_name)
         return None, None
 
+    def validateHost(self, headers):
+        host = headers.get('host', None)
+        if host is not None and host in self.hosts:
+            return True
+
+        return False
+
     @print_exc
     def thingsGetHandler(self, httpClient, httpResponse):
+        if not self.validateHost(httpClient.GetRequestHeaders()):
+            httpResponse.WriteResponseError(403)
+            return
+
         httpResponse.WriteResponseJSONOk(
             obj=[
                 thing.as_thing_description()
@@ -232,6 +266,10 @@ class WebThingServer:
 
     @print_exc
     def thingGetHandler(self, httpClient, httpResponse, routeArgs=None):
+        if not self.validateHost(httpClient.GetRequestHeaders()):
+            httpResponse.WriteResponseError(403)
+            return
+
         self.thing = self.getThing(routeArgs)
         if self.thing is None:
             httpResponse.WriteResponseNotFound()
@@ -244,6 +282,10 @@ class WebThingServer:
 
     @print_exc
     def propertyGetHandler(self, httpClient, httpResponse, routeArgs=None):
+        if not self.validateHost(httpClient.GetRequestHeaders()):
+            httpResponse.WriteResponseError(403)
+            return
+
         thing, prop = self.getProperty(routeArgs)
         if thing is None or prop is None:
             httpResponse.WriteResponseNotFound()
@@ -255,6 +297,10 @@ class WebThingServer:
 
     @print_exc
     def propertyPutHandler(self, httpClient, httpResponse, routeArgs=None):
+        if not self.validateHost(httpClient.GetRequestHeaders()):
+            httpResponse.WriteResponseError(403)
+            return
+
         thing, prop = self.getProperty(routeArgs)
         if thing is None or prop is None:
             httpResponse.WriteResponseNotFound()
