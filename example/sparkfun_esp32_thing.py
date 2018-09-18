@@ -81,7 +81,8 @@ class Button(Thing):
                      self.button,
                      metadata={
                          'type': 'boolean',
-                         'description': 'Button 0 pressed'
+                         'description': 'Button 0 pressed',
+                         'readOnly': True,
                      }))
         self.prev_pressed = self.is_pressed()
 

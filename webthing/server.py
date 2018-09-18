@@ -6,6 +6,7 @@ import logging
 import sys
 import network
 
+from errors import PropertyError
 from utils import get_ip
 
 log = logging.getLogger(__name__)
@@ -338,8 +339,8 @@ class WebThingServer:
             return
         try:
             prop.set_value(args[prop.get_name()])
-        except AttributeError:
-            httpResponse.WriteResponseForbidden()
+        except PropertyError:
+            httpResponse.WriteResponseBadRequest()
             return
         httpResponse.WriteResponseJSONOk(
             obj={prop.get_name(): prop.get_value()},

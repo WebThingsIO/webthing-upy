@@ -31,13 +31,10 @@ class FadeAction(Action):
 def make_thing():
     thing = Thing('My Lamp', ['OnOffSwitch', 'Light'], 'A web connected lamp')
 
-    def noop(_):
-        pass
-
     thing.add_property(
         Property(thing,
                  'on',
-                 Value(True, noop),
+                 Value(True),
                  metadata={
                      '@type': 'OnOffProperty',
                      'label': 'On/Off',
@@ -47,7 +44,7 @@ def make_thing():
     thing.add_property(
         Property(thing,
                  'brightness',
-                 Value(50, noop),
+                 Value(50),
                  metadata={
                      '@type': 'BrightnessProperty',
                      'label': 'Brightness',
