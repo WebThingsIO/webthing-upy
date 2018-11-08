@@ -14,14 +14,16 @@ def timestamp():
     return '{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}+00:00'.format(*now[:6])
 
 
-def get_ip():
+def get_addresses():
     """
-    Get the default local IP address.
+    Get all IP addresses.
+
+    Returns list of addresses.
     """
+    addresses = ['127.0.0.1']
+
     station = network.WLAN(network.STA_IF)
     if station.isconnected():
-        ip = station.ifconfig()[0]
-    else:
-        ip = '127.0.0.1'
+        addresses.append(station.ifconfig()[0])
 
-    return ip
+    return addresses
