@@ -56,7 +56,7 @@ class ExampleDimmableLight(Thing):
                      metadata={
                          '@type': 'BrightnessProperty',
                          'label': 'Brightness',
-                         'type': 'number',
+                         'type': 'integer',
                          'description': 'The level of light from 0-100',
                          'minimum': 0,
                          'maximum': 100,
@@ -76,13 +76,13 @@ class ExampleDimmableLight(Thing):
                     ],
                     'properties': {
                         'brightness': {
-                            'type': 'number',
+                            'type': 'integer',
                             'minimum': 0,
                             'maximum': 100,
                             'unit': 'percent',
                         },
                         'duration': {
-                            'type': 'number',
+                            'type': 'integer',
                             'minimum': 1,
                             'unit': 'milliseconds',
                         },
@@ -97,7 +97,7 @@ class ExampleDimmableLight(Thing):
                 'description':
                 'The lamp has exceeded its safe operating temperature',
                 'type': 'number',
-                'unit': 'celsius',
+                'unit': 'degree celsius',
             })
 
 
