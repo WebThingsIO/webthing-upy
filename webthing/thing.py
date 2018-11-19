@@ -28,7 +28,6 @@ class Thing:
         self.events = []
         self.subscribers = set()
         self.href_prefix = ''
-        self.ws_href = None
         self.ui_href = None
 
     def as_thing_description(self):
@@ -67,12 +66,6 @@ class Thing:
             ],
         }
 
-        if self.ws_href is not None:
-            thing['links'].append({
-                'rel': 'alternate',
-                'href': self.ws_href,
-            })
-
         if self.ui_href is not None:
             thing['links'].append({
                 'rel': 'alternate',
@@ -84,6 +77,17 @@ class Thing:
             thing['description'] = self.description
 
         return thing
+
+    def get_href(self):
+        """Get this thing's href."""
+        if self.href_prefix:
+            return self.href_prefix
+
+        return '/'
+
+    def get_ui_href(self):
+        """Get the UI href."""
+        return self.ui_href
 
     def set_href_prefix(self, prefix):
         """
@@ -105,14 +109,6 @@ class Thing:
         for action_name in self.actions.keys():
             for action in self.actions[action_name]:
                 action.set_href_prefix(prefix)
-
-    def set_ws_href(self, href):
-        """
-        Set the href of this thing's websocket.
-
-        href -- the href
-        """
-        self.ws_href = href
 
     def set_ui_href(self, href):
         """

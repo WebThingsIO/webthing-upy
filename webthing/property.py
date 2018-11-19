@@ -2,7 +2,7 @@
 
 from copy import copy
 
-from .errors import PropertyError
+from errors import PropertyError
 
 
 class Property:

@@ -7,7 +7,7 @@ import sys
 import network
 
 from errors import PropertyError
-from utils import get_ip
+from utils import get_addresses
 
 log = logging.getLogger(__name__)
 
@@ -125,7 +125,6 @@ class WebThingServer:
         self.name = things.get_name()
         self.port = port
         self.hostname = hostname
-        self.ip = get_ip()
 
         station = network.WLAN()
         mac = station.config('mac')
@@ -133,15 +132,17 @@ class WebThingServer:
           mac[3], mac[4], mac[5])
 
         self.hosts = [
-            '127.0.0.1',
-            '127.0.0.1:{}'.format(self.port),
             'localhost',
             'localhost:{}'.format(self.port),
-            self.ip,
-            '{}:{}'.format(self.ip, self.port),
             '{}.local'.format(self.system_hostname),
             '{}.local:{}'.format(self.system_hostname, self.port),
         ]
+
+        for address in get_addresses():
+            self.hosts.extend([
+                address,
+                '{}:{}'.format(address, self.port),
+            ])
 
         if self.hostname is not None:
             self.hostname = self.hostname.lower()
@@ -207,13 +208,6 @@ class WebThingServer:
                 ),
             ]
 
-        for idx, thing in enumerate(self.things.get_things()):
-            href = '//{}:{}{}'.format(
-                self.hostname if self.hostname is not None else self.ip,
-                self.port,
-                thing.href_prefix)
-            thing.set_ws_href('ws{}:{}'.format(self.ssl_suffix, href))
-
         self.server = MicroWebSrv(webPath='/flash/www',
                                   routeHandlers=handlers,
                                   port=port)
@@ -224,12 +218,10 @@ class WebThingServer:
 
     def start(self):
         """Start listening for incoming connections."""
-        url = 'http{}://{}:{}/'.format(self.ssl_suffix, self.ip, self.port)
-
         # If WebSocketS used and NOT running in thread, and WebServer IS
         # running in thread make shure WebServer has enough stack size to
         # handle also the WebSocket requests.
-        log.info('Starting Web Server on ' + url)
+        log.info('Starting Web Server on port {}'.format(self.port))
         self.server.Start(threaded=srv_run_in_thread, stackSize=12*1024)
 
         mdns = network.mDNS()
@@ -273,11 +265,22 @@ class WebThingServer:
             httpResponse.WriteResponseError(403)
             return
 
+        ws_href = 'ws{}://{}'.format(
+            self.ssl_suffix,
+            httpClient.GetRequestHeaders().get('host', '')
+        )
+
+        descriptions = []
+        for thing in self.things.get_things():
+            description = thing.as_thing_description()
+            description['links'].append({
+                'rel': 'alternate',
+                'href': '{}{}'.format(ws_href, thing.get_href()),
+            })
+            descriptions.append(description)
+
         httpResponse.WriteResponseJSONOk(
-            obj=[
-                thing.as_thing_description()
-                for idx, thing in enumerate(self.things.get_things())
-            ],
+            obj=descriptions,
             headers=_CORS_HEADERS,
         )
 
@@ -292,9 +295,20 @@ class WebThingServer:
         if thing is None:
             httpResponse.WriteResponseNotFound()
             return
-        descr = thing.as_thing_description()
+
+        ws_href = 'ws{}://{}'.format(
+            self.ssl_suffix,
+            httpClient.GetRequestHeaders().get('host', '')
+        )
+
+        description = thing.as_thing_description()
+        description['links'].append({
+            'rel': 'alternate',
+            'href': '{}{}'.format(ws_href, thing.get_href()),
+        })
+
         httpResponse.WriteResponseJSONOk(
-            obj=descr,
+            obj=description,
             headers=_CORS_HEADERS,
         )
 
