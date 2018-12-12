@@ -37,7 +37,7 @@ def make_thing():
                  Value(True),
                  metadata={
                      '@type': 'OnOffProperty',
-                     'label': 'On/Off',
+                     'title': 'On/Off',
                      'type': 'boolean',
                      'description': 'Whether the lamp is turned on',
                  }))
@@ -47,7 +47,7 @@ def make_thing():
                  Value(50),
                  metadata={
                      '@type': 'BrightnessProperty',
-                     'label': 'Brightness',
+                     'title': 'Brightness',
                      'type': 'integer',
                      'description': 'The level of light from 0-100',
                      'minimum': 0,
@@ -58,7 +58,7 @@ def make_thing():
     thing.add_available_action(
         'fade',
         {
-            'label': 'Fade',
+            'title': 'Fade',
             'description': 'Fade the lamp to a given level',
             'input': {
                 'type': 'object',

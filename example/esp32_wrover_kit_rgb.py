@@ -33,7 +33,7 @@ class RGBLed(Thing):
                      Value(True, self.setOnOff),
                      metadata={
                          '@type': 'OnOffProperty',
-                         'label': 'On/Off',
+                         'title': 'On/Off',
                          'type': 'boolean',
                          'description': 'Whether the LED is turned on',
                      }))
@@ -43,7 +43,7 @@ class RGBLed(Thing):
                      Value('#808080', self.setRGBColor),
                      metadata={
                          '@type': 'ColorProperty',
-                         'label': 'Color',
+                         'title': 'Color',
                          'type': 'string',
                          'description': 'The color of the LED',
                      }))

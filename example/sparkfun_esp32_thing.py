@@ -28,7 +28,7 @@ class Led(Thing):
                      Value(self.on, self.setOnOff),
                      metadata={
                          '@type': 'OnOffProperty',
-                         'label': 'On/Off',
+                         'title': 'On/Off',
                          'type': 'boolean',
                          'description': 'Whether the LED is turned on',
                      }))
@@ -38,7 +38,7 @@ class Led(Thing):
                      Value(self.ledBrightness, self.setBrightness),
                      metadata={
                          '@type': 'BrightnessProperty',
-                         'label': 'Brightness',
+                         'title': 'Brightness',
                          'type': 'number',
                          'minimum': 0,
                          'maximum': 100,
