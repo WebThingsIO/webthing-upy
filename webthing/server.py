@@ -110,14 +110,19 @@ class MultipleThings:
 class WebThingServer:
     """Server to represent a Web Thing over HTTP."""
 
-    def __init__(self, things, port=80, hostname=None, ssl_options=None):
+    def __init__(self, things, port=80, hostname=None, ssl_options=None,
+                 additional_routes=None):
         """
         Initialize the WebThingServer.
+
+        For documentation on the additional route format, see:
+        https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/microWebSrv
 
         things -- list of Things managed by this server
         port -- port to listen on (defaults to 80)
         hostname -- Optional host name, i.e. mything.com
         ssl_options -- dict of SSL options to pass to the tornado server
+        additional_routes -- list of additional routes to add to the server
         """
         self.ssl_suffix = '' if ssl_options is None else 's'
 
@@ -207,6 +212,9 @@ class WebThingServer:
                     self.propertyPutHandler
                 ),
             ]
+
+        if isinstance(additional_routes, list):
+            handlers = additional_routes + handlers
 
         self.server = MicroWebSrv(webPath='/flash/www',
                                   routeHandlers=handlers,

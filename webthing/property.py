@@ -1,6 +1,6 @@
 """High-level Property base class implementation."""
 
-from copy import copy
+from copy import deepcopy
 
 from errors import PropertyError
 
@@ -81,13 +81,17 @@ class Property:
 
         Returns a dictionary describing the property.
         """
-        description = copy(self.metadata)
-        description['links'] = [
+        description = deepcopy(self.metadata)
+
+        if 'links' not in description:
+            description['links'] = []
+
+        description['links'].append(
             {
                 'rel': 'property',
                 'href': self.href_prefix + self.href,
-            },
-        ]
+            }
+        )
         return description
 
     def set_href_prefix(self, prefix):
