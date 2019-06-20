@@ -6,20 +6,22 @@ import json
 class Thing:
     """A Web Thing."""
 
-    def __init__(self, name, type_=[], description=''):
+    def __init__(self, id_, title, type_=[], description=''):
         """
         Initialize the object.
 
-        name -- the thing's name
+        id_ -- the thing's unique ID - must be a URI
+        title -- the thing's title
         type_ -- the thing's type(s)
         description -- description of the thing
         """
         if not isinstance(type_, list):
             type_ = [type_]
 
+        self.id = id_
         self.context = 'https://iot.mozilla.org/schemas'
         self.type = type_
-        self.name = name
+        self.title = title
         self.description = description
         self.properties = {}
         self.available_actions = {}
@@ -37,8 +39,8 @@ class Thing:
         Returns the state as a dictionary.
         """
         thing = {
-            'name': self.name,
-            'href': self.href_prefix if self.href_prefix else '/',
+            'id': self.id,
+            'title': self.title,
             '@context': self.context,
             '@type': self.type,
             'properties': self.get_property_descriptions(),
@@ -124,13 +126,21 @@ class Thing:
         """
         self.ui_href = href
 
-    def get_name(self):
+    def get_id(self):
         """
-        Get the name of the thing.
+        Get the ID of the thing.
 
-        Returns the name as a string.
+        Returns the ID as a string.
         """
-        return self.name
+        return self.id
+
+    def get_title(self):
+        """
+        Get the title of the thing.
+
+        Returns the title as a string.
+        """
+        return self.title
 
     def get_context(self):
         """

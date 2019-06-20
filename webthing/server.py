@@ -66,7 +66,7 @@ class SingleThing:
 
     def get_name(self):
         """Get the mDNS server name."""
-        return self.thing.name
+        return self.thing.title
 
 
 class MultipleThings:
@@ -273,6 +273,10 @@ class WebThingServer:
             httpResponse.WriteResponseError(403)
             return
 
+        base_href = 'http{}://{}'.format(
+            self.ssl_suffix,
+            httpClient.GetRequestHeaders().get('host', '')
+        )
         ws_href = 'ws{}://{}'.format(
             self.ssl_suffix,
             httpClient.GetRequestHeaders().get('host', '')
@@ -285,6 +289,13 @@ class WebThingServer:
                 'rel': 'alternate',
                 'href': '{}{}'.format(ws_href, thing.get_href()),
             })
+            description['base'] = '{}{}'.format(base_href, thing.get_href())
+            description['securityDefinitions'] = {
+                'nosec_sc': {
+                    'scheme': 'nosec',
+                },
+            }
+            description['security'] = 'nosec_sc'
             descriptions.append(description)
 
         httpResponse.WriteResponseJSONOk(
@@ -304,6 +315,10 @@ class WebThingServer:
             httpResponse.WriteResponseNotFound()
             return
 
+        base_href = 'http{}://{}'.format(
+            self.ssl_suffix,
+            httpClient.GetRequestHeaders().get('host', '')
+        )
         ws_href = 'ws{}://{}'.format(
             self.ssl_suffix,
             httpClient.GetRequestHeaders().get('host', '')
@@ -314,6 +329,13 @@ class WebThingServer:
             'rel': 'alternate',
             'href': '{}{}'.format(ws_href, thing.get_href()),
         })
+        description['base'] = '{}{}'.format(base_href, thing.get_href())
+        description['securityDefinitions'] = {
+            'nosec_sc': {
+                'scheme': 'nosec',
+            },
+        }
+        description['security'] = 'nosec_sc'
 
         httpResponse.WriteResponseJSONOk(
             obj=description,
