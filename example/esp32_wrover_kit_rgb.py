@@ -11,10 +11,13 @@ log = logging.getLogger(__name__)
 class RGBLed(Thing):
 
     def __init__(self, rPin, gPin, bPin):
-        Thing.__init__(self,
-                       'ESP32-RGB-LED',
-                       ['OnOffSwitch', 'Light', 'ColorControl'],
-                       'RGB LED on ESP-Wrover-Kit')
+        Thing.__init__(
+            self,
+            'urn:dev:ops:esp32-rgb-led-1234',
+            'ESP32-RGB-LED',
+            ['OnOffSwitch', 'Light', 'ColorControl'],
+            'RGB LED on ESP-Wrover-Kit'
+        )
         self.pinRed = machine.Pin(rPin, machine.Pin.OUT)
         self.pinGreen = machine.Pin(gPin, machine.Pin.OUT)
         self.pinBlue = machine.Pin(bPin, machine.Pin.OUT)

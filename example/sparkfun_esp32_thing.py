@@ -12,10 +12,13 @@ log = logging.getLogger(__name__)
 class Led(Thing):
 
     def __init__(self, ledPin):
-        Thing.__init__(self,
-                       'Blue LED',
-                       ['OnOffSwitch', 'Light'],
-                       'Blue LED on SparkFun ESP32 Thing')
+        Thing.__init__(
+            self,
+            'urn:dev:ops:blue-led-1234',
+            'Blue LED',
+            ['OnOffSwitch', 'Light'],
+            'Blue LED on SparkFun ESP32 Thing'
+        )
         self.pinLed = machine.Pin(ledPin, machine.Pin.OUT)
         self.pwmLed = machine.PWM(self.pinLed)
         self.ledBrightness = 50
