@@ -289,6 +289,7 @@ class WebThingServer:
                 'rel': 'alternate',
                 'href': '{}{}'.format(ws_href, thing.get_href()),
             })
+            description['href'] = thing.get_href()
             description['base'] = '{}{}'.format(base_href, thing.get_href())
             description['securityDefinitions'] = {
                 'nosec_sc': {
