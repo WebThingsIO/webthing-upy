@@ -246,7 +246,11 @@ class WebThingServer:
 
     def getThing(self, routeArgs):
         """Get the thing ID based on the route."""
-        thing_id = routeArgs['thing_id'] if 'thing_id' in routeArgs else None
+        if not routeArgs or 'thing_id' not in routeArgs:
+            thing_id = None
+        else:
+            thing_id = routeArgs['thing_id']
+
         return self.things.get_thing(thing_id)
 
     def getProperty(self, routeArgs):
