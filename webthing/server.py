@@ -163,6 +163,11 @@ class WebThingServer:
 
             handlers = [
                 (
+                    '/.*',
+                    'OPTIONS',
+                    self.optionsHandler
+                ),
+                (
                     '/',
                     'GET',
                     self.thingsGetHandler
@@ -191,6 +196,11 @@ class WebThingServer:
         else:
             log.info('Registering a single thing')
             handlers = [
+                (
+                    '/.*',
+                    'OPTIONS',
+                    self.optionsHandler
+                ),
                 (
                     '/',
                     'GET',
@@ -269,6 +279,15 @@ class WebThingServer:
             return True
 
         return False
+
+    @print_exc
+    def optionsHandler(self, httpClient, httpResponse, routeArgs=None):
+        """Handle an OPTIONS request to any path."""
+        if not self.validateHost(httpClient.GetRequestHeaders()):
+            httpResponse.WriteResponseError(403)
+            return
+
+        httpResponse.WriteResponse(204, _CORS_HEADERS, None, None, None)
 
     @print_exc
     def thingsGetHandler(self, httpClient, httpResponse):
