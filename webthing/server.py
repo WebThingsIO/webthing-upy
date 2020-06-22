@@ -34,6 +34,7 @@ _CORS_HEADERS = {
 
 def print_exc(func):
     """Wrap a function and print an exception, if encountered."""
+
     def wrapper(*args, **kwargs):
         try:
             # log.debug('Calling {}'.format(func.__name__))
@@ -42,6 +43,7 @@ def print_exc(func):
             return ret
         except Exception as err:
             sys.print_exception(err)
+
     return wrapper
 
 
@@ -51,7 +53,6 @@ class SingleThing:
     def __init__(self, thing):
         """
         Initialize the container.
-
         thing -- the thing to store
         """
         self.thing = thing
@@ -75,7 +76,6 @@ class MultipleThings:
     def __init__(self, things, name):
         """
         Initialize the container.
-
         things -- the things to store
         name -- the mDNS server name
         """
@@ -85,7 +85,6 @@ class MultipleThings:
     def get_thing(self, idx):
         """
         Get the thing at the given index.
-
         idx -- the index
         """
         try:
@@ -114,10 +113,8 @@ class WebThingServer:
                  additional_routes=None):
         """
         Initialize the WebThingServer.
-
         For documentation on the additional route format, see:
         https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/microWebSrv
-
         things -- list of Things managed by this server
         port -- port to listen on (defaults to 80)
         hostname -- Optional host name, i.e. mything.com
@@ -134,7 +131,7 @@ class WebThingServer:
         station = network.WLAN()
         mac = station.config('mac')
         self.system_hostname = 'esp32-upy-{:02x}{:02x}{:02x}'.format(
-          mac[3], mac[4], mac[5])
+            mac[3], mac[4], mac[5])
 
         self.hosts = [
             'localhost',
@@ -240,14 +237,14 @@ class WebThingServer:
         # running in thread make shure WebServer has enough stack size to
         # handle also the WebSocket requests.
         log.info('Starting Web Server on port {}'.format(self.port))
-        self.server.Start(threaded=srv_run_in_thread, stackSize=12*1024)
+        self.server.Start(threaded=srv_run_in_thread, stackSize=12 * 1024)
 
         mdns = network.mDNS()
         mdns.start(self.system_hostname, 'MicroPython with mDNS')
         mdns.addService('_webthing', '_tcp', 80, self.system_hostname,
                         {
-                          'board': 'ESP32',
-                          'path': '/',
+                            'board': 'ESP32',
+                            'path': '/',
                         })
 
     def stop(self):
@@ -272,9 +269,13 @@ class WebThingServer:
                 return thing, thing.find_property(property_name)
         return None, None
 
+    def getHeader(self, headers, key, default=None):
+        standardized = {k.lower(): v for k, v in headers.items()}
+        return standardized.get(key, default)
+
     def validateHost(self, headers):
         """Validate the Host header in the request."""
-        host = headers.get('host', None) or headers.get('Host', None)
+        host = self.getHeader(headers, 'host')
         if host is not None and host.lower() in self.hosts:
             return True
 
@@ -296,17 +297,14 @@ class WebThingServer:
             httpResponse.WriteResponseError(403)
             return
 
+        headers = httpClient.GetRequestHeaders()
         base_href = 'http{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', None)
-            or httpClient.GetRequestHeaders().get('Host', None)
-            or ''
+            self.getHeader(headers, 'host', '')
         )
         ws_href = 'ws{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', None)
-            or httpClient.GetRequestHeaders().get('Host', None)
-            or ''
+            self.getHeader(headers, 'host', '')
         )
 
         descriptions = []
@@ -343,17 +341,14 @@ class WebThingServer:
             httpResponse.WriteResponseNotFound()
             return
 
+        headers = httpClient.GetRequestHeaders()
         base_href = 'http{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', None)
-            or httpClient.GetRequestHeaders().get('Host', None)
-            or ''
+            self.getHeader(headers, 'host', '')
         )
         ws_href = 'ws{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', None)
-            or httpClient.GetRequestHeaders().get('Host', None)
-            or ''
+            self.getHeader(headers, 'host', '')
         )
 
         description = thing.as_thing_description()
