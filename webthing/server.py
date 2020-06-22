@@ -34,7 +34,6 @@ _CORS_HEADERS = {
 
 def print_exc(func):
     """Wrap a function and print an exception, if encountered."""
-
     def wrapper(*args, **kwargs):
         try:
             # log.debug('Calling {}'.format(func.__name__))
@@ -43,7 +42,6 @@ def print_exc(func):
             return ret
         except Exception as err:
             sys.print_exception(err)
-
     return wrapper
 
 
@@ -131,7 +129,7 @@ class WebThingServer:
         station = network.WLAN()
         mac = station.config('mac')
         self.system_hostname = 'esp32-upy-{:02x}{:02x}{:02x}'.format(
-            mac[3], mac[4], mac[5])
+          mac[3], mac[4], mac[5])
 
         self.hosts = [
             'localhost',
@@ -237,14 +235,14 @@ class WebThingServer:
         # running in thread make shure WebServer has enough stack size to
         # handle also the WebSocket requests.
         log.info('Starting Web Server on port {}'.format(self.port))
-        self.server.Start(threaded=srv_run_in_thread, stackSize=12 * 1024)
+        self.server.Start(threaded=srv_run_in_thread, stackSize=12*1024)
 
         mdns = network.mDNS()
         mdns.start(self.system_hostname, 'MicroPython with mDNS')
         mdns.addService('_webthing', '_tcp', 80, self.system_hostname,
                         {
-                            'board': 'ESP32',
-                            'path': '/',
+                          'board': 'ESP32',
+                          'path': '/',
                         })
 
     def stop(self):
