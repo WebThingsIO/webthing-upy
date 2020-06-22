@@ -274,7 +274,7 @@ class WebThingServer:
 
     def validateHost(self, headers):
         """Validate the Host header in the request."""
-        host = headers.get('host', None)
+        host = headers.get('host', None) or headers.get('Host', None)
         if host is not None and host.lower() in self.hosts:
             return True
 
@@ -298,11 +298,15 @@ class WebThingServer:
 
         base_href = 'http{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', '')
+            httpClient.GetRequestHeaders().get('host', None)
+            or httpClient.GetRequestHeaders().get('Host', None)
+            or ''
         )
         ws_href = 'ws{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', '')
+            httpClient.GetRequestHeaders().get('host', None)
+            or httpClient.GetRequestHeaders().get('Host', None)
+            or ''
         )
 
         descriptions = []
@@ -341,11 +345,15 @@ class WebThingServer:
 
         base_href = 'http{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', '')
+            httpClient.GetRequestHeaders().get('host', None)
+            or httpClient.GetRequestHeaders().get('Host', None)
+            or ''
         )
         ws_href = 'ws{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', '')
+            httpClient.GetRequestHeaders().get('host', None)
+            or httpClient.GetRequestHeaders().get('Host', None)
+            or ''
         )
 
         description = thing.as_thing_description()
