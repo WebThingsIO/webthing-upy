@@ -51,7 +51,7 @@ class SingleThing:
     def __init__(self, thing):
         """
         Initialize the container.
-        
+
         thing -- the thing to store
         """
         self.thing = thing
@@ -75,7 +75,7 @@ class MultipleThings:
     def __init__(self, things, name):
         """
         Initialize the container.
-        
+
         things -- the things to store
         name -- the mDNS server name
         """
@@ -85,7 +85,7 @@ class MultipleThings:
     def get_thing(self, idx):
         """
         Get the thing at the given index.
-        
+
         idx -- the index
         """
         try:
@@ -114,10 +114,10 @@ class WebThingServer:
                  additional_routes=None):
         """
         Initialize the WebThingServer.
-        
+
         For documentation on the additional route format, see:
         https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/microWebSrv
-        
+
         things -- list of Things managed by this server
         port -- port to listen on (defaults to 80)
         hostname -- Optional host name, i.e. mything.com
