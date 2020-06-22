@@ -272,9 +272,13 @@ class WebThingServer:
                 return thing, thing.find_property(property_name)
         return None, None
 
+    def getHeader(self, headers, key, default=None):
+        standardized = {k.lower(): v for k, v in headers.items()}
+        return standardized.get(key, default)
+
     def validateHost(self, headers):
         """Validate the Host header in the request."""
-        host = headers.get('host', None)
+        host = self.getHeader(headers, 'host')
         if host is not None and host.lower() in self.hosts:
             return True
 
@@ -296,13 +300,14 @@ class WebThingServer:
             httpResponse.WriteResponseError(403)
             return
 
+        headers = httpClient.GetRequestHeaders()
         base_href = 'http{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', '')
+            self.getHeader(headers, 'host', '')
         )
         ws_href = 'ws{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', '')
+            self.getHeader(headers, 'host', '')
         )
 
         descriptions = []
@@ -339,13 +344,14 @@ class WebThingServer:
             httpResponse.WriteResponseNotFound()
             return
 
+        headers = httpClient.GetRequestHeaders()
         base_href = 'http{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', '')
+            self.getHeader(headers, 'host', '')
         )
         ws_href = 'ws{}://{}'.format(
             self.ssl_suffix,
-            httpClient.GetRequestHeaders().get('host', '')
+            self.getHeader(headers, 'host', '')
         )
 
         description = thing.as_thing_description()
