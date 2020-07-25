@@ -41,3 +41,7 @@ webthing-upy> repl
 >>> Control-D
 ```
 Pressing Control-D will cause the board to soft reboot which will start executing main.py.
+
+# Adding to Gateway
+
+To add your web thing to the WebThings Gateway, install the "Web Thing" add-on and follow the instructions [here](https://github.com/mozilla-iot/thing-url-adapter#readme).
