@@ -44,4 +44,4 @@ Pressing Control-D will cause the board to soft reboot which will start executin
 
 # Adding to Gateway
 
-To add your web thing to the WebThings Gateway, install the "Web Thing" add-on and follow the instructions [here](https://github.com/mozilla-iot/thing-url-adapter#readme).
+To add your web thing to the WebThings Gateway, install the "Web Thing" add-on and follow the instructions [here](https://github.com/WebThingsIO/thing-url-adapter#readme).
