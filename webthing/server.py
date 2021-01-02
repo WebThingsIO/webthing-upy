@@ -56,7 +56,7 @@ class SingleThing:
         """
         self.thing = thing
 
-    def get_thing(self, _):
+    def get_thing(self, _=None):
         """Get the thing at the given index."""
         return self.thing
 
@@ -111,18 +111,24 @@ class WebThingServer:
     """Server to represent a Web Thing over HTTP."""
 
     def __init__(self, things, port=80, hostname=None, ssl_options=None,
-                 additional_routes=None):
+                 additional_routes=None, base_path='',
+                 disable_host_validation=False):
         """
         Initialize the WebThingServer.
 
         For documentation on the additional route format, see:
         https://github.com/loboris/MicroPython_ESP32_psRAM_LoBo/wiki/microWebSrv
 
-        things -- list of Things managed by this server
+        things -- things managed by this server -- should be of type
+                  SingleThing or MultipleThings
         port -- port to listen on (defaults to 80)
         hostname -- Optional host name, i.e. mything.com
         ssl_options -- dict of SSL options to pass to the tornado server
         additional_routes -- list of additional routes to add to the server
+        base_path -- base URL path to use, rather than '/'
+        disable_host_validation -- whether or not to disable host validation --
+                                   note that this can lead to DNS rebinding
+                                   attacks
         """
         self.ssl_suffix = '' if ssl_options is None else 's'
 
@@ -130,6 +136,8 @@ class WebThingServer:
         self.name = things.get_name()
         self.port = port
         self.hostname = hostname
+        self.base_path = base_path.rstrip('/')
+        self.disable_host_validation = disable_host_validation
 
         station = network.WLAN()
         mac = station.config('mac')
@@ -157,74 +165,77 @@ class WebThingServer:
             ])
 
         if isinstance(self.things, MultipleThings):
-            log.info('Registering multiple things')
             for idx, thing in enumerate(self.things.get_things()):
-                thing.set_href_prefix('/{}'.format(idx))
+                thing.set_href_prefix('{}/{}'.format(self.base_path, idx))
 
             handlers = [
-                (
+                [
                     '/.*',
                     'OPTIONS',
                     self.optionsHandler
-                ),
-                (
+                ],
+                [
                     '/',
                     'GET',
                     self.thingsGetHandler
-                ),
-                (
+                ],
+                [
                     '/<thing_id>',
                     'GET',
                     self.thingGetHandler
-                ),
-                (
+                ],
+                [
                     '/<thing_id>/properties',
                     'GET',
                     self.propertiesGetHandler
-                ),
-                (
+                ],
+                [
                     '/<thing_id>/properties/<property_name>',
                     'GET',
                     self.propertyGetHandler
-                ),
-                (
+                ],
+                [
                     '/<thing_id>/properties/<property_name>',
                     'PUT',
                     self.propertyPutHandler
-                ),
+                ],
             ]
         else:
-            log.info('Registering a single thing')
+            self.things.get_thing().set_href_prefix(self.base_path)
             handlers = [
-                (
+                [
                     '/.*',
                     'OPTIONS',
                     self.optionsHandler
-                ),
-                (
+                ],
+                [
                     '/',
                     'GET',
                     self.thingGetHandler
-                ),
-                (
+                ],
+                [
                     '/properties',
                     'GET',
                     self.propertiesGetHandler
-                ),
-                (
+                ],
+                [
                     '/properties/<property_name>',
                     'GET',
                     self.propertyGetHandler
-                ),
-                (
+                ],
+                [
                     '/properties/<property_name>',
                     'PUT',
                     self.propertyPutHandler
-                ),
+                ],
             ]
 
         if isinstance(additional_routes, list):
             handlers = additional_routes + handlers
+
+        if self.base_path:
+            for h in handlers:
+                h[0] = self.base_path + h[0]
 
         self.server = MicroWebSrv(webPath='/flash/www',
                                   routeHandlers=handlers,
@@ -279,7 +290,8 @@ class WebThingServer:
     def validateHost(self, headers):
         """Validate the Host header in the request."""
         host = self.getHeader(headers, 'host')
-        if host is not None and host.lower() in self.hosts:
+        if self.disable_host_validation or (
+                host is not None and host.lower() in self.hosts):
             return True
 
         return False
